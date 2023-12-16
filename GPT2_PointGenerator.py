@@ -209,18 +209,26 @@ class Model(torch.nn.Module):
         
 
 # %%
-def train_model(model, tokenizer, data_loader, epochs):
-    
-    
-    optimizer = torch.optim.AdamW(model.parameters(), lr=0.0001)
+def save_checkpoint(model, optimizer, epoch, iteration, filename):
+
+    torch.save({
+        'epoch':epoch,
+        'iteration': iteration,
+        'model_state_dict':model.state_dict(),
+        'optimizer_state_dict':optimizer.state_dict()
+    }, filename)
+
+# %%
+def train_model(model, optimizer, tokenizer, data_loader, epochs):
     
     loss_per_epoch = []
-    
+    min_loss = 1000
+
     for epoch in range(epochs):
         
         losses = []
 
-        for batch in data_loader:
+        for b_in, batch in enumerate(data_loader):
             
             # Set the model to train mode to enable dropout etc need to change it during evaluation
             model.train()
@@ -261,6 +269,10 @@ def train_model(model, tokenizer, data_loader, epochs):
             wandb.log({"Batch Loss" : loss.item()})
             
             print(losses)
+
+            if loss.item() < min_loss:
+                save_checkpoint(model, optimizer, epoch, b_in, 'model_10ktrain.pth' )
+
     
         epoch_loss = np.average(losses)
         loss_per_epoch.append(epoch_loss)
@@ -285,7 +297,7 @@ gpt_model = GPT2LMHeadModel.from_pretrained("gpt2").to(get_device())
 special_tokens = {'bos_token':'<|startoftext|>','eos_token':'<|endofthetext|>','pad_token':'<pad>','additional_special_tokens':['<|keyword|>','<|summarize|>']}
 tokenizer.add_special_tokens(special_tokens)
 
-#Resizing the token embeddings to include the new tokens
+#Resizing the token embeddings to include the new tokens 
 gpt_model.resize_token_embeddings(len(tokenizer))
 
 traindataset, valdataset = data_loader_gpt_token.data_processor(tokenizer, 10000)
@@ -297,11 +309,53 @@ data_loader = DataLoader(dataset1, batch_size=2, shuffle=True)
 
 model = Model(gpt_model, tokenizer)
 
+optimizer = torch.optim.AdamW(model.parameters(), lr=0.0001)
+
+#To load the model
+#checkpoint = torch.load('model_10ktrain.pth')
+#model.load_state_dict(checkpoint['model_state_dict'])
+#optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+
+
 train_model(model, tokenizer, data_loader, 1)
 
 
 
 # %%
+#For main class
 
 
+#importing weightsandbiases
+wandb.init(project='gpt2-pointet_generator', entity='amaldev04')
 
+#Importing the model and tokenizer
+tokenizer = AutoTokenizer.from_pretrained("gpt2")
+gpt_model = GPT2LMHeadModel.from_pretrained("gpt2").to(get_device())
+
+#Adding the special tokens for the final model for summariation
+special_tokens = {'bos_token':'<|startoftext|>','eos_token':'<|endofthetext|>','pad_token':'<pad>','additional_special_tokens':['<|keyword|>','<|summarize|>']}
+tokenizer.add_special_tokens(special_tokens)
+
+#Resizing the token embeddings to include the new tokens 
+gpt_model.resize_token_embeddings(len(tokenizer))
+
+traindataset, valdataset = data_loader_gpt_token.data_processor(tokenizer, 10000)
+#returns a list of tokenized data as (input_id, type_id, lm_label) 
+data_batch = data_loader_gpt_token.smart_batching(traindataset, tokenizer)
+#cretes a dataloader object for fetching data
+dataset1 = CustomDataset(data_batch)
+data_loader = DataLoader(dataset1, batch_size=2, shuffle=True)
+
+model = Model(gpt_model, tokenizer)
+
+optimizer = torch.optim.AdamW(model.parameters(), lr=0.0001)
+
+#To load the model
+checkpoint = torch.load('model_10ktrain.pth')
+model.load_state_dict(checkpoint['model_state_dict'])
+optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+
+
+train_model(model, tokenizer, data_loader, 1)
+
+# %%
