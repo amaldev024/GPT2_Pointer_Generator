@@ -287,6 +287,8 @@ def train_model(model, optimizer, tokenizer, data_loader, epochs):
 
 
 #importing weightsandbiases
+wandb.login(key="5b1542b1afc9b0b7d21909fcf0d8c08e35621bb7")
+#initialize new run
 wandb.init(project='gpt2-pointet_generator', entity='amaldev04')
 
 #Importing the model and tokenizer
