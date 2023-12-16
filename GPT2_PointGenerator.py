@@ -235,7 +235,7 @@ def train_model(model, optimizer, tokenizer, data_loader, epochs):
 
             input_tensor, input_data = batch[0], batch[1]
             
-            num_seg_a = torch.nonzero(input_tensor == tokenizer.additional_special_tokens_ids[0])[:, 1:2] 
+            num_seg_a = torch.nonzero(input_tensor == tokenizer.encode('<|summarize|>')[:, 1:2] 
             end_index = torch.nonzero(input_tensor == tokenizer.eos_token_id)[:, 1:2]
             mask = torch.cat((num_seg_a, end_index), dim=1).to(get_device())
             
