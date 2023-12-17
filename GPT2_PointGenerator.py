@@ -309,7 +309,7 @@ data_batch = data_loader_gpt_token.smart_batching(traindataset, tokenizer)
 dataset1 = CustomDataset(data_batch)
 data_loader = DataLoader(dataset1, batch_size=2, shuffle=True)
 
-model = Model(gpt_model, tokenizer)
+model = Model(gpt_model, tokenizer).to(get_device())
 
 optimizer = torch.optim.AdamW(model.parameters(), lr=0.0001)
 
