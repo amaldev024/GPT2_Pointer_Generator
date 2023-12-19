@@ -127,7 +127,7 @@ def compute_target_mask(x, mask):
     for i in range(x.shape[0]):
         st, en = mask[i]
         #copy the target values as target with shifting
-        target[i, st:en-1] = x[i, st+1 : en] 
+        target[i, st:en+1] = x[i, st+1 : en+2] 
     return target
 
 # %%
