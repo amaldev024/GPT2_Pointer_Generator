@@ -309,7 +309,7 @@ traindataset, valdataset = data_loader_gpt_token.data_processor(tokenizer, 10000
 data_batch = data_loader_gpt_token.smart_batching(traindataset, tokenizer)
 #cretes a dataloader object for fetching data
 dataset1 = CustomDataset(data_batch)
-data_loader = DataLoader(dataset1, batch_size=64, shuffle=True)
+data_loader = DataLoader(dataset1, batch_size=2, shuffle=True)
 
 model = Model(gpt_model, tokenizer).to(get_device())
 
