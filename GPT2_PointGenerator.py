@@ -127,7 +127,7 @@ def compute_target_mask(x, mask):
     for i in range(x.shape[0]):
         st, en = mask[i]
         #copy the target values as target with shifting
-        target[i, st:en+1] = x[i, st+1 : en+2] 
+        target[i, st:en] = x[i, st+1 : en+1] 
     return target
 
 # %%
@@ -319,5 +319,5 @@ optimizer = torch.optim.AdamW(model.parameters(), lr=0.0001)
 #optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 
 
-no_epochs = 100
+no_epochs = 10
 train_model(model, optimizer, tokenizer, data_loader, no_epochs)
