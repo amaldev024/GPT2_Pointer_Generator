@@ -273,6 +273,8 @@ def train_model(model, optimizer, tokenizer, data_loader, epochs):
             if loss.item() < min_loss:
                 save_checkpoint(model, optimizer, epoch, b_in, 'model_10ktrain.pth' )
 
+            save_checkpoint(model, optimizer, epoch, b_in, 'model_10ktrain_full.pth' )
+
     
         epoch_loss = np.average(losses)
         loss_per_epoch.append(epoch_loss)
